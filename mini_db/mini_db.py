@@ -29,3 +29,8 @@ class MiniDb:
             writer = csv.DictWriter(f, fieldnames=self.fields)
             writer.writerow(data_row)
         return new_id
+
+    def read(self):
+        with open(self.filename, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            return [row for row in reader if row['deleted'] == 'False']
