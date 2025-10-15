@@ -15,3 +15,17 @@ class MiniDb:
             with open(self.filename, 'w', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=self.fields)
                 writer.writeheader()
+
+    def insert(self, data: dict) -> int:
+        with open(self.seq_file, 'r+') as f:
+            current_id = int(f.read())
+            new_id = current_id + 1
+            f.seek(0)
+            f.write(str(new_id))
+            f.truncate()
+
+        data_row = {'id': new_id, **data, 'deleted': False}
+        with open (self.filename, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=self.fields)
+            writer.writerow(data_row)
+        return new_id
