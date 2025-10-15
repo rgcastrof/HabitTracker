@@ -80,3 +80,15 @@ class MiniDb:
                 if row['deleted'] == 'False':
                     count += 1
         return count
+
+    def vacuum(self):
+        temp_file = self.filename + '.tmp'
+        with open(self.filename, 'r', newline='', encoding='utf-8') as f_in, \
+            open(temp_file, 'w', newline='', encoding='utf-8') as f_out:
+            reader = csv.DictReader(f_in)
+            writer = csv.DictWriter(f_out, fieldnames=self.fields)
+            writer.writeheader()
+            for row in reader:
+                if row['deleted'] == 'False':
+                    writer.writerow(row)
+        os.replace(temp_file, self.filename)
