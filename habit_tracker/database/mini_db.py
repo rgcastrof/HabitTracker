@@ -71,3 +71,12 @@ class MiniDb:
                 writer.writeheader()
                 writer.writerows(rows)
         return deleted
+
+    def count(self) -> int:
+        count = 0
+        with open(self.filename, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row['deleted'] == 'False':
+                    count += 1
+        return count
