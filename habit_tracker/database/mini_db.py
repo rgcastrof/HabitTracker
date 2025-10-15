@@ -34,3 +34,23 @@ class MiniDb:
         with open(self.filename, 'r', newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             return [row for row in reader if row['deleted'] == 'False']
+
+    def update(self, id, new_data) -> bool:
+        updated = False
+        with open(self.filename, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            rows = [row for row in reader]
+        for row in rows:
+            if row['id'] == str(id) and row['deleted'] == 'False':
+                row.update(new_data)
+                updated = True
+                break
+        if updated:
+            with open(self.filename, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=self.fields)
+                writer.writeheader()
+                writer.writerows(rows)
+            return True
+        else:
+            return False
+
