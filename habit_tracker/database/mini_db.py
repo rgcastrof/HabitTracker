@@ -54,3 +54,20 @@ class MiniDb:
         else:
             return False
 
+    def delete(self, id) -> bool:
+        deleted = False
+        with open(self.filename, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            rows = [row for row in reader]
+
+        for row in rows:
+            if row['id'] == str(id) and row['deleted'] == 'False':
+                row['deleted'] = 'True'
+                deleted = True
+                break
+        if deleted:
+            with open(self.filename, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=self.fields)
+                writer.writeheader()
+                writer.writerows(rows)
+        return deleted
