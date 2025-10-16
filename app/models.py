@@ -10,23 +10,23 @@ class RecordStatus(Enum):
     SKIPPED = 'pulado'
 
 class User(BaseModel):
-    id: int
+    id: Optional[int] = None
     name: str
     email: EmailStr
     passwd: str
-    register_date: datetime
+    register_date: Optional[datetime] = None
     active: bool
 
 class Habit(BaseModel):
-    id: int
+    id: Optional[int] = None
     user_id: int
     name: str
     description: str
     frequence: str
-    creation_date: datetime
+    creation_date: Optional[datetime] = None
 
 class Record(BaseModel):
-    id: int
+    id: Optional[int] = None
     habit_id: int
     timestamp: datetime
     status: RecordStatus
