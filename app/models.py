@@ -9,6 +9,9 @@ class RecordStatus(Enum):
     POSTPONED = 'adiado'
     SKIPPED = 'pulado'
 
+class CountResponse(BaseModel):
+    total_entities: int
+
 class User(BaseModel):
     id: Optional[int] = None
     name: str
