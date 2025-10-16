@@ -39,3 +39,18 @@ async def get_users(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1))
         "total": total,
         "users": paginated_users
     }
+
+# TODO: Fazer o CRUD completo da entidade
+
+@router.get("/count", response_model=CountResponse)
+async def get_count():
+    try:
+        all_users = db.read()
+        total = len(all_users)
+        return {"total_entities": total}
+    except Exception as e:
+        print(f"Erro ao ler banco de dados: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Não foi possível acessar ou ler banco de dados"
+        )
