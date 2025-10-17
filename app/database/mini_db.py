@@ -30,6 +30,12 @@ class MiniDb:
             writer.writerow(data_row)
         return new_id
 
+    def read_one(self, target_id) -> Optional[dict]:
+        with open(self.filename, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            searched_user = next((u for u in reader if u.get('id') == str(target_id)), None)
+            return searched_user
+
     def read(self):
         with open(self.filename, 'r', newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f)
