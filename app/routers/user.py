@@ -1,15 +1,7 @@
+from app.models.user import *
 from fastapi import APIRouter, Query, HTTPException
 from app.database.mini_db import MiniDb
-from app.models import User, CountResponse
 from datetime import datetime
-from pydantic import BaseModel
-from typing import List
-
-class UsersPaginationResponse(BaseModel):
-    page: int
-    page_size: int
-    total: int
-    users: List[User]
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -18,19 +10,24 @@ db = MiniDb(
         fields=["id", "name", "email", "passwd", "register_date", "deleted", "active"]
     )
 
-@router.post("/", response_model=User)
-async def create_user(user: User):
-    user_data = user.dict(exclude={"id", "register_date"})
-    user_data["register_date"] = datetime.utcnow().isoformat()
-    new_id = db.insert(user_data)
-    return User(id=new_id, **user_data)
+# Cria usuario
+@router.post("/", response_model=User, status_code=201)
+async def create_user(user: UserCreate):
+    user_data = user.model_dump()
+    user_data["register_date"] = datetime.now()
+    created_user_data = db.insert(user_data)
 
+    if not created_user_data:
+        raise HTTPException(detail="Failed to create user", status_code=500)
+    return User.model_validate(created_user_data)
+
+# Retorna página
 @router.get("/", response_model=UsersPaginationResponse)
 async def get_users(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1)):
     all_users = db.read()
     start = (page - 1) * page_size
     end = start + page_size
-    paginated_users = [User(**u) for u in all_users[start:end]]
+    paginated_users = [User.model_validate(u) for u in all_users[start:end]]
     total = len(all_users)
 
     return {
@@ -42,12 +39,12 @@ async def get_users(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1))
 
 # TODO: Fazer o CRUD completo da entidade
 
-@router.get("/count", response_model=CountResponse)
+@router.get("/count", response_model=UsersCountResponse)
 async def get_count():
     try:
         all_users = db.read()
         total = len(all_users)
-        return {"total_entities": total}
+        return {"total_users": total}
     except Exception as e:
         print(f"Erro ao ler banco de dados: {e}")
         raise HTTPException(
