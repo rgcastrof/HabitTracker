@@ -10,7 +10,7 @@ class MiniDb:
 
         if not os.path.exists(self.seq_file):
             with open(self.seq_file, 'w') as f:
-                f.write("0")
+                f.write("-1")
 
         if not os.path.exists(self.filename):
             with open(self.filename, 'w', newline='', encoding='utf-8') as f:
