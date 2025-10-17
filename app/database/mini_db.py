@@ -1,11 +1,12 @@
 import csv
 import os
+from typing import Optional
 
 class MiniDb:
     def __init__(self, filename, fields: list[str]):
         self.filename = filename
         self.seq_file = filename.replace('.csv', '.seq')
-        self.fields = ['id'] + fields + ['deleted']
+        self.fields = fields
 
         if not os.path.exists(self.seq_file):
             with open(self.seq_file, 'w') as f:
@@ -16,7 +17,7 @@ class MiniDb:
                 writer = csv.DictWriter(f, fieldnames=self.fields)
                 writer.writeheader()
 
-    def insert(self, data: dict) -> int:
+    def insert(self, data: dict) -> dict:
         with open(self.seq_file, 'r+') as f:
             current_id = int(f.read())
             new_id = current_id + 1
@@ -24,11 +25,11 @@ class MiniDb:
             f.write(str(new_id))
             f.truncate()
 
-        data_row = {'id': new_id, **data, 'deleted': False}
+        data_row = {'id': str(new_id), **data, 'deleted': 'False', 'active': 'True'}
         with open (self.filename, 'a', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=self.fields)
             writer.writerow(data_row)
-        return new_id
+        return data_row
 
     def read_one(self, target_id) -> Optional[dict]:
         with open(self.filename, 'r', newline='', encoding='utf-8') as f:
@@ -41,24 +42,24 @@ class MiniDb:
             reader = csv.DictReader(f)
             return [row for row in reader if row['deleted'] == 'False']
 
-    def update(self, id, new_data) -> bool:
-        updated = False
+    def update(self, id, new_data) -> Optional[dict]:
+        updated = None
         with open(self.filename, 'r', newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             rows = [row for row in reader]
         for row in rows:
             if row['id'] == str(id) and row['deleted'] == 'False':
                 row.update(new_data)
-                updated = True
+                updated = row
                 break
         if updated:
             with open(self.filename, 'w', newline='', encoding='utf-8') as f:
                 writer = csv.DictWriter(f, fieldnames=self.fields)
                 writer.writeheader()
                 writer.writerows(rows)
-            return True
+            return updated
         else:
-            return False
+            return None
 
     def delete(self, id) -> bool:
         deleted = False
