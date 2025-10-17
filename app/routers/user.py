@@ -56,6 +56,16 @@ async def update_user(user_id: int, user: UserUpdate):
         raise HTTPException(status_code=404, detail="User with id {user_id} not found")
     return UserUpdate.model_validate(updated_data)
 
+# Delete
+@router.delete("/{user_id}", status_code=204)
+async def delete_user(user_id: int):
+    success = db.delete(user_id);
+    if not success:
+        raise HTTPException(status_code=404, detail=f"User with id: {user_id} not found.")
+    db.vacuum()
+    return
+
+# Conta todas as entidades
 @router.get("/count", response_model=UsersCountResponse)
 async def get_count():
     try:
