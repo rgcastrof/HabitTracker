@@ -15,7 +15,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 db = MiniDb(
         filename="users.csv",
-        fields = ["name", "email", "passwd", "register_date", "active"]
+        fields=["id", "name", "email", "passwd", "register_date", "deleted", "active"]
     )
 
 @router.post("/", response_model=User)
