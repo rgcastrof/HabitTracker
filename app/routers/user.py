@@ -37,7 +37,24 @@ async def get_users(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1))
         "users": paginated_users
     }
 
-# TODO: Fazer o CRUD completo da entidade
+# Read de um usuario inidividual
+@router.get("/{user_id}", response_model=User)
+async def get_user(user_id: int):
+    searched_user = db.read_one(user_id)
+    if not searched_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return User.model_validate(searched_user)
+
+# Update
+@router.put("/{user_id}", response_model=UserUpdate)
+async def update_user(user_id: int, user: UserUpdate):
+    user_update_data = user.model_dump()
+
+    updated_data = db.update(user_id, user_update_data)
+
+    if not updated_data:
+        raise HTTPException(status_code=404, detail="User with id {user_id} not found")
+    return UserUpdate.model_validate(updated_data)
 
 @router.get("/count", response_model=UsersCountResponse)
 async def get_count():
