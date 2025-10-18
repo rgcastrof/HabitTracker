@@ -1,7 +1,11 @@
 from app.models.user import *
+from app.models.hash import *
 from fastapi import APIRouter, Query, HTTPException
+from fastapi.responses import StreamingResponse
 from app.database.mini_db import MiniDb
+from app.utils.zip_utils import generate_zip_stream
 from datetime import datetime
+import hashlib
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -36,6 +40,15 @@ async def get_users(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1))
         "total": total,
         "users": paginated_users
     }
+
+# Funcionalidade 5
+@router.get("/export_zip")
+async def export_csv_zip():
+    return StreamingResponse(
+        generate_zip_stream(),
+        media_type="application/zip",
+        headers={"Content-Disposition": "attachment; filename=users.zip"}
+    )
 
 # Read de um usuario inidividual
 @router.get("/{user_id}", response_model=User)
