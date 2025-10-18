@@ -25,7 +25,15 @@ class MiniDb:
             f.write(str(new_id))
             f.truncate()
 
-        data_row = {'id': str(new_id), **data, 'deleted': 'False', 'active': 'True'}
+        default_fields = {
+                'id': str(new_id),
+                'deleted': 'False'
+        }
+
+        if 'active' in self.fields:
+            default_fields['active'] = 'True'
+
+        data_row = {**default_fields, **data}
         with open (self.filename, 'a', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=self.fields)
             writer.writerow(data_row)
