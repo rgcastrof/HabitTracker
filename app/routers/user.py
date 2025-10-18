@@ -23,7 +23,7 @@ async def create_user(user: UserCreate):
 
     if not created_user_data:
         raise HTTPException(detail="Failed to create user", status_code=500)
-    return User.model_validate(created_user_data)
+    return User(**created_user_data)
 
 # Retorna página
 @router.get("/", response_model=UsersPaginationResponse)
