@@ -18,9 +18,15 @@ db_habits = MiniDb(
         fields=["id", "user_id", "name", "description", "frequence", "creation_date", "deleted"]
     )
 
+db_records = MiniDb(
+        filename="records.csv",
+        fields=["id", "habit_id", "timestamp", "status", "observation", "deleted"]
+    )
+
 data_sources = {
     "users": db_users.read(),
-    "habits": db_habits.read()
+    "habits": db_habits.read(),
+    "records": db_records.read()
 }
 
 class Count(BaseModel):
