@@ -8,21 +8,19 @@ def get_database_data():
         for row in reader:
             yield row
 
-def generate_zip_stream():
+def generate_zip_stream(entities: dict[str, list[dict]]):
     zip_buffer = io.BytesIO()
 
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_f:
-        with zip_f.open("users.csv", mode='w') as csv_file:
-            writer = io.TextIOWrapper(csv_file, encoding='utf-8', newline='')
-            csv_writer = None
-
-            for row in get_database_data():  # Essa função retorna os dados do seu mini banco
-                if csv_writer is None:
-                    fieldnames = list(row.keys())
-                    csv_writer = csv.DictWriter(writer, fieldnames=fieldnames)
-                    csv_writer.writeheader()
-                csv_writer.writerow(row)
-            writer.flush()
+        for filename, data in entities.items():
+            if not data:
+                continue
+            csv_buffer = io.StringIO()
+            fields = data[0].keys()
+            writer = csv.DictWriter(csv_buffer, fieldnames=fields)
+            writer.writeheader()
+            writer.writerows(data)
+            zip_f.writestr(f"{filename}.csv", csv_buffer.getvalue())
 
     zip_buffer.seek(0)
     chunk_size = 1024 * 1024  # 1MB
