@@ -1,7 +1,8 @@
 from pydantic import BaseModel
+from app.models.user import User
 
 class HashRequest(BaseModel):
-    data: str
+    data: User
     hash_func: str
 
 class HashResponse(BaseModel):

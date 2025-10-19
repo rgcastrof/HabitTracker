@@ -52,6 +52,8 @@ async def generate_hash(req: HashRequest):
     hash_func = req.hash_func.lower()
     if hash_func not in ("md5", "sha1", "sha256"):
         raise HTTPException(status_code=400, detail="A função de hash deve ser md5, sha1, ou sha256")
+
+    data_bytes: bytes = req.data.model_dump_json().encode('utf-8')
     h = hashlib.new(hash_func)
-    h.update(req.data.encode())
+    h.update(data_bytes)
     return HashResponse(hash=h.hexdigest())
