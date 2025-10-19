@@ -32,6 +32,3 @@ class UsersPaginationResponse(BaseModel):
     page_size: int
     total: int
     users: List[User]
-
-class UsersCountResponse(BaseModel):
-    total_users: int

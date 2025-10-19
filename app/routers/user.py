@@ -4,7 +4,6 @@ from app.utils.pagination import paginate_data
 from fastapi import APIRouter, Query, HTTPException
 from datetime import datetime
 from app.utils.router_utils import db_users
-import hashlib
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -18,12 +17,6 @@ async def create_user(user: UserCreate):
     if not created_user_data:
         raise HTTPException(detail="Failed to create user", status_code=500)
     return User(**created_user_data)
-
-# Retorna página
-@router.get("/", response_model=UsersPaginationResponse)
-async def get_users(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1)):
-    all_users = db_users.read()
-    return paginate_data(all_users, page, page_size, User)
 
 # Read de um usuario inidividual
 @router.get("/{user_id}", response_model=User)
@@ -53,27 +46,8 @@ async def delete_user(user_id: int):
     db_users.vacuum()
     return
 
-# Conta todas as entidades
-@router.get("/count", response_model=UsersCountResponse)
-async def get_count():
-    try:
-        all_users = db_users.read()
-        total = len(all_users)
-        return {"total_users": total}
-    except Exception as e:
-        print(f"Erro ao ler banco de dados: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="Não foi possível acessar ou ler banco de dados"
-        )
-
-
-# Funcionalidade 6
-@router.post("/hash", response_model=HashResponse)
-async def generate_hash(req: HashRequest):
-    hash_func = req.hash_func.lower()
-    if hash_func not in ("md5", "sha1", "sha256"):
-        raise HTTPException(status_code=400, detail="A função de hash deve ser md5, sha1, ou sha256")
-    h = hashlib.new(hash_func)
-    h.update(req.data.encode())
-    return HashResponse(hash=h.hexdigest())
+# Retorna página
+@router.get("/", response_model=UsersPaginationResponse)
+async def get_users(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1)):
+    all_users = db_users.read()
+    return paginate_data(all_users, page, page_size, User)
