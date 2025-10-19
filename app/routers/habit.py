@@ -1,0 +1,31 @@
+from app.models.habit import *
+from app.models.hash import *
+from app.utils.pagination import paginate_data
+from fastapi import APIRouter, HTTPException, Query
+from datetime import datetime
+from app.utils.router_utils import db_users, db_habits
+
+router = APIRouter(prefix="/habits", tags=["Habits"])
+
+# Cria hábito
+@router.post("/", response_model=Habit, status_code=201)
+async def create_habit(habit: HabitCreate):
+    users = db_users.read()
+
+    # Verifica se o usuário no id passado existe
+    if not any(u['id'] == str(habit.user_id) for u in users):
+        raise HTTPException(status_code=404, detail="User not found")
+
+    habit_data = habit.model_dump()
+    habit_data["creation_date"] = datetime.now()
+    created_habit_data = db_habits.insert(habit_data)
+
+    if not created_habit_data:
+        raise HTTPException(detail="Failed to create habit", status_code=500)
+    return Habit.model_validate(created_habit_data)
+
+# Retorna página
+@router.get("/", response_model=HabitsPaginationResponse)
+async def get_users(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1)):
+    all_habits = db_habits.read()
+    return paginate_data(all_habits, page, page_size, Habit)
