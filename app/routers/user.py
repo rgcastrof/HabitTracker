@@ -1,25 +1,19 @@
 from app.models.user import *
 from app.models.hash import *
+from app.utils.pagination import paginate_data
 from fastapi import APIRouter, Query, HTTPException
-from fastapi.responses import StreamingResponse
-from app.database.mini_db import MiniDb
-from app.utils.zip_utils import generate_zip_stream
 from datetime import datetime
+from app.utils.router_utils import db_users
 import hashlib
 
 router = APIRouter(prefix="/users", tags=["Users"])
-
-db = MiniDb(
-        filename="users.csv",
-        fields=["id", "name", "email", "passwd", "register_date", "deleted", "active"]
-    )
 
 # Cria usuario
 @router.post("/", response_model=User, status_code=201)
 async def create_user(user: UserCreate):
     user_data = user.model_dump()
     user_data["register_date"] = datetime.now()
-    created_user_data = db.insert(user_data)
+    created_user_data = db_users.insert(user_data)
 
     if not created_user_data:
         raise HTTPException(detail="Failed to create user", status_code=500)
@@ -28,32 +22,13 @@ async def create_user(user: UserCreate):
 # Retorna página
 @router.get("/", response_model=UsersPaginationResponse)
 async def get_users(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1)):
-    all_users = db.read()
-    start = (page - 1) * page_size
-    end = start + page_size
-    paginated_users = [User.model_validate(u) for u in all_users[start:end]]
-    total = len(all_users)
-
-    return {
-        "page": page,
-        "page_size": page_size,
-        "total": total,
-        "users": paginated_users
-    }
-
-# Funcionalidade 5
-@router.get("/export_zip")
-async def export_csv_zip():
-    return StreamingResponse(
-        generate_zip_stream(),
-        media_type="application/zip",
-        headers={"Content-Disposition": "attachment; filename=users.zip"}
-    )
+    all_users = db_users.read()
+    return paginate_data(all_users, page, page_size, User)
 
 # Read de um usuario inidividual
 @router.get("/{user_id}", response_model=User)
 async def get_user(user_id: int):
-    searched_user = db.read_one(user_id)
+    searched_user = db_users.read_one(user_id)
     if not searched_user:
         raise HTTPException(status_code=404, detail="User not found")
     return User.model_validate(searched_user)
@@ -63,7 +38,7 @@ async def get_user(user_id: int):
 async def update_user(user_id: int, user: UserUpdate):
     user_update_data = user.model_dump()
 
-    updated_data = db.update(user_id, user_update_data)
+    updated_data = db_users.update(user_id, user_update_data)
 
     if not updated_data:
         raise HTTPException(status_code=404, detail="User with id {user_id} not found")
@@ -72,17 +47,17 @@ async def update_user(user_id: int, user: UserUpdate):
 # Delete
 @router.delete("/{user_id}", status_code=204)
 async def delete_user(user_id: int):
-    success = db.delete(user_id);
+    success = db_users.delete(user_id);
     if not success:
         raise HTTPException(status_code=404, detail=f"User with id: {user_id} not found.")
-    db.vacuum()
+    db_users.vacuum()
     return
 
 # Conta todas as entidades
 @router.get("/count", response_model=UsersCountResponse)
 async def get_count():
     try:
-        all_users = db.read()
+        all_users = db_users.read()
         total = len(all_users)
         return {"total_users": total}
     except Exception as e:
