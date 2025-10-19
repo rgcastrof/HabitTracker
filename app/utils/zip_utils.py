@@ -7,6 +7,10 @@ def generate_zip_stream(entities: dict[str, list[dict]]):
 
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_f:
         for filename, data in entities.items():
+            if not data:
+                print(f"Aviso: Pulando o arquivo {filename}.csv pois não há dados.")
+                continue
+
             csv_buffer = io.StringIO()
             fields = data[0].keys()
             writer = csv.DictWriter(csv_buffer, fieldnames=fields)
