@@ -31,4 +31,4 @@ class UsersPaginationResponse(BaseModel):
     page: int
     page_size: int
     total: int
-    users: List[User]
+    items: List[User]

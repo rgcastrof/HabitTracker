@@ -3,7 +3,7 @@ from app.models.hash import *
 from app.utils.pagination import paginate_data
 from fastapi import APIRouter, Query, HTTPException
 from datetime import datetime
-from app.utils.router_utils import db_users
+from app.routers.utils import db_users
 
 router = APIRouter(prefix="/users", tags=["Users"])
 

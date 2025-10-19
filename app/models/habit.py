@@ -33,4 +33,4 @@ class HabitsPaginationResponse(BaseModel):
     page: int
     page_size: int
     total: int
-    habits: List[Habit]
+    items: List[Habit]
