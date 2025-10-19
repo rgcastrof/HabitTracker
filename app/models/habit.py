@@ -8,6 +8,15 @@ class HabitCreate(BaseModel):
     description: str
     frequence: str
 
+class HabitUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    frequence: Optional[str] = None
+    deleted: Optional[bool] = None
+
+    class Config:
+        extra = "ignore"
+
 class Habit(BaseModel):
     id: Optional[int] = None
     user_id: int
@@ -25,6 +34,3 @@ class HabitsPaginationResponse(BaseModel):
     page_size: int
     total: int
     habits: List[Habit]
-
-class HabitsCountResponse(BaseModel):
-    total_habits: int
