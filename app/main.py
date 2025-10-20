@@ -4,7 +4,11 @@ from app.routers.habit import router as habit_router
 from app.routers.records import router as record_router
 from app.routers.utils import router as utils_router
 
-app = FastAPI()
+app = FastAPI(
+    title = "Habit Tracker",
+    description="Sistema de Rastreamento de Hábitos",
+)
+
 app.include_router(utils_router)
 app.include_router(user_router)
 app.include_router(habit_router)
