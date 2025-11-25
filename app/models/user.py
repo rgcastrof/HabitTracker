@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 class UserBase(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(max_length=50)
-    email: str = Field(max_length=100, unique=True)
+    email: str = Field(max_length=100)
     password: str = Field(max_length=50)
     creation_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 

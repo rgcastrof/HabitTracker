@@ -9,8 +9,8 @@ if TYPE_CHECKING:
 
 class HabitBase(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
-    description: str = Field(max_length=255, nullable=True)
     name: str = Field(max_length=50)
+    description: str | None = Field(max_length=255)
     active: bool = Field(default=True)
     started_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     frequence: Frequence | None = Field(
