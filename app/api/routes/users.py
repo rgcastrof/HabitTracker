@@ -68,3 +68,19 @@ async def update_user(user_id: int, user_update: UserUpdate, db: Session = Depen
         db.rollback()
         print(f"Erro ao atualizar dados do usuário: {e}")
         raise HTTPException(status_code=500, detail="Erro ao atualizar dados do usuário")
+
+# Delete
+@router.delete("/{user_id}", status_code=204)
+async def delete_user(user_id: int, db: Session = Depends(get_session)):
+    user = db.get(User, user_id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    try:
+        db.delete(user)
+        db.commit()
+        return None
+    except Exception as e:
+        db.rollback()
+        print(f"Erro ao deletar usuário: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao deletar usuário")
