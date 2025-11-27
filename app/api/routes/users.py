@@ -9,7 +9,7 @@ router = APIRouter()
 # CRUD Operations
 # Create
 @router.post("/", response_model=UserRead)
-async def create_user(user: UserCreate, db: Session = Depends(get_session)):
+def create_user(user: UserCreate, db: Session = Depends(get_session)):
     try:
         db_user = User(**user.model_dump())
         db.add(db_user)
@@ -23,7 +23,7 @@ async def create_user(user: UserCreate, db: Session = Depends(get_session)):
 
 # Read (all)
 @router.get("/", response_model=list[UserRead])
-async def list_users(
+def list_users(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=10, le=100),
     db: Session = Depends(get_session)
@@ -41,7 +41,7 @@ async def get_user(user_id: int, db: Session = Depends(get_session)):
 
 # Update
 @router.patch("/{user_id}", response_model=UserRead)
-async def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_session)):
+def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_session)):
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(404, detail="Usuário não encontrado")
@@ -71,7 +71,7 @@ async def update_user(user_id: int, user_update: UserUpdate, db: Session = Depen
 
 # Delete
 @router.delete("/{user_id}", status_code=204)
-async def delete_user(user_id: int, db: Session = Depends(get_session)):
+def delete_user(user_id: int, db: Session = Depends(get_session)):
     user = db.get(User, user_id)
 
     if not user:
