@@ -13,4 +13,4 @@ class UserBase(SQLModel):
     creation_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class User(UserBase, table=True):
-    habits: list['Habit'] = Relationship(back_populates="user")
+    habits: list['Habit'] = Relationship(back_populates="user", cascade_delete=True)

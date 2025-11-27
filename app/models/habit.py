@@ -21,4 +21,4 @@ class HabitBase(SQLModel):
 class Habit(HabitBase, table=True):
     user_id: int = Field(foreign_key="user.id")
     user: 'User' = Relationship(back_populates="habits")
-    records: list['Record'] = Relationship(back_populates="habit")
+    records: list['Record'] = Relationship(back_populates="habit", cascade_delete=True)
