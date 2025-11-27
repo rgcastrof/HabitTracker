@@ -1,88 +1,50 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.models.user import User
-from sqlmodel import Session, select
+from sqlmodel import Session
 from app.core.database import get_session
-import logging
+from app.crud.base import CRUDBase
 
 router = APIRouter()
-logger = logging.getLogger(__name__)
+crud_user = CRUDBase(User)
 
 # CRUD Operations
 # Create
 @router.post("/", response_model=UserRead)
 def create_user(user: UserCreate, db: Session = Depends(get_session)):
-    try:
-        db_user = User(**user.model_dump())
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-        return db_user
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Erro ao criar usuário: {e}")
+    created_user = crud_user.create(user, db)
+    if not created_user:
         raise HTTPException(status_code=500, detail="Erro ao criar usuário")
+    return created_user
 
 # Read (all)
 @router.get("/", response_model=list[UserRead])
-def list_users(
-    offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=10, le=100),
+def get_all_users(
+    offset=Query(default=0, ge=0),
+    limit=Query(default=10, le=100),
     db: Session = Depends(get_session)
 ):
-    stmt = select(User).offset(offset).limit(limit)
-    return db.exec(stmt).all()
+    return crud_user.get_all(offset=offset, limit=limit, db=db)
 
 # Read (one)
 @router.get("/{user_id}", response_model=UserRead)
 def get_user(user_id: int, db: Session = Depends(get_session)):
-    user = db.get(User, user_id)
-    if not user:
-        raise HTTPException(404, detail="Usuário não encontrado")
-    return user
+    getted_user = crud_user.get_by_id(user_id, db)
+    if not getted_user:
+        raise HTTPException(status_code=404, detail=f"Usuário com id: {user_id} não encontrado")
+    return getted_user
 
 # Update
 @router.patch("/{user_id}", response_model=UserRead)
 def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_session)):
-    user = db.get(User, user_id)
-    if not user:
-        raise HTTPException(404, detail="Usuário não encontrado")
-
-    if user_update.name is not None:
-        if user_update.name.strip() == "":
-            raise HTTPException(status_code=400, detail="Nome não pode ser vazio")
-        user.name = user_update.name
-    if user_update.email is not None:
-        if user_update.email.strip() == "":
-            raise HTTPException(status_code=400, detail="Email não pode ser vazio")
-        user.email = user_update.email
-    if user_update.password is not None:
-        if user_update.password.strip() == "":
-            raise HTTPException(status_code=400, detail="Senha não pode ser vazio")
-        user.password = user_update.password
-
-    try:
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        return user
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Erro ao atualizar dados do usuário: {e}")
-        raise HTTPException(status_code=500, detail="Erro ao atualizar dados do usuário")
+    updated_user = crud_user.update(user_id, user_update, db)
+    if not updated_user:
+        raise HTTPException(status_code=500, detail="Erro ao atualizar dados do usuário no banco")
+    return updated_user
 
 # Delete
 @router.delete("/{user_id}", status_code=204)
 def delete_user(user_id: int, db: Session = Depends(get_session)):
-    user = db.get(User, user_id)
-
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    try:
-        db.delete(user)
-        db.commit()
-        return None
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Erro ao deletar usuário: {e}")
+    deleted_user = crud_user.delete(user_id, db)
+    if not deleted_user:
         raise HTTPException(status_code=500, detail="Erro ao deletar usuário")
