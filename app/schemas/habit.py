@@ -16,3 +16,9 @@ class HabitRead(SQLModel):
     active: bool
     frequence: Frequence | None
     started_date: datetime
+
+class HabitUpdate(SQLModel):
+    name: str | None
+    description: str | None
+    active: bool | None
+    frequence: Frequence | None
