@@ -3,8 +3,10 @@ from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.models.user import User
 from sqlmodel import Session, select
 from app.core.database import get_session
+import logging
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # CRUD Operations
 # Create
@@ -18,7 +20,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_session)):
         return db_user
     except Exception as e:
         db.rollback()
-        print(f"Erro ao criar usuário: {e}")
+        logger.error(f"Erro ao criar usuário: {e}")
         raise HTTPException(status_code=500, detail="Erro ao criar usuário")
 
 # Read (all)
@@ -33,7 +35,7 @@ def list_users(
 
 # Read (one)
 @router.get("/{user_id}", response_model=UserRead)
-async def get_user(user_id: int, db: Session = Depends(get_session)):
+def get_user(user_id: int, db: Session = Depends(get_session)):
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(404, detail="Usuário não encontrado")
@@ -66,7 +68,7 @@ def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get
         return user
     except Exception as e:
         db.rollback()
-        print(f"Erro ao atualizar dados do usuário: {e}")
+        logger.error(f"Erro ao atualizar dados do usuário: {e}")
         raise HTTPException(status_code=500, detail="Erro ao atualizar dados do usuário")
 
 # Delete
@@ -82,5 +84,5 @@ def delete_user(user_id: int, db: Session = Depends(get_session)):
         return None
     except Exception as e:
         db.rollback()
-        print(f"Erro ao deletar usuário: {e}")
+        logger.error(f"Erro ao deletar usuário: {e}")
         raise HTTPException(status_code=500, detail="Erro ao deletar usuário")
