@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, create_engine, Session
-from config import settings
+from app.core.config import settings
 import logging
 
 logging.basicConfig()
