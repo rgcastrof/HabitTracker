@@ -11,3 +11,8 @@ class UserRead(SQLModel):
     name: str
     email: str
     creation_date: datetime
+
+class UserUpdate(SQLModel):
+    name: str | None
+    email: str | None
+    password: str | None
