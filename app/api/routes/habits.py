@@ -52,6 +52,6 @@ def update_habit(habit_id: int, habit_update: HabitUpdate, db: Session = Depends
 
 @router.delete("/{habit_id}", status_code=204)
 def delete_habit(habit_id: int, db: Session = Depends(get_session)):
-    deleted_user = crud_habit.delete(habit_id, db)
-    if not deleted_user:
-        raise HTTPException(status_code=500, detail="Erro ao deletar ususário")
+    deleted_habit = crud_habit.delete(habit_id, db)
+    if not deleted_habit:
+        raise HTTPException(status_code=500, detail="Erro ao deletar hábito")
