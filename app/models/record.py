@@ -8,8 +8,8 @@ if TYPE_CHECKING:
 
 class RecordBase(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
+    value: float
     status: Status = Field(sa_column=SAEnum(name="status_enum"))
-    value: float | None = Field(default=None, nullable=True)
     comment: str | None = Field(max_length=255)
     creation_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
