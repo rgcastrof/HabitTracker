@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
-from sqlmodel import Session, select
+from sqlmodel import Session, column, select
 from app.core.database import get_session
 from app.models.habit import Habit
 from app.models.record import Record
@@ -87,7 +87,8 @@ def get_records_by_habit(
     db: Session = Depends(get_session)
 ):
     try:
-        stmt = select(Record).join(Habit).where(Habit.id == habit_id).offset(offset).limit(limit)
+        stmt = select(Record).join(Habit).where(Habit.id == habit_id).order_by(column("creation_date").desc())
+        stmt = stmt.offset(offset).limit(limit)
         return db.exec(stmt).all()
     except SQLAlchemyError as e:
         raise HTTPException(
