@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import SQLAlchemyError
 from app.models.habit import Habit
+from app.models.record import Record
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.models.user import User
-from app.schemas.habit import HabitRead
-from sqlmodel import Session, select
+from app.schemas.habit import ActiveHabitsResponse, HabitRead
+from sqlmodel import Session, func, select
 from app.core.database import get_session
 from app.crud.base import CRUDBase
 
@@ -69,3 +70,15 @@ def get_habits_by_user(
             status_code=500,
             detail=f"Erro ao buscar habitos associados a usuario com id {user_id}: {e}"
         )
+
+# Consulta complexa: retornar a quantidade de habitos ativos de um usuario
+@router.get("/{user_id}/habits/active", response_model=ActiveHabitsResponse)
+def get_active_habits_count(user_id: int, db: Session = Depends(get_session)):
+    try:
+        stmt = select(func.count("*")).where(
+            (Habit.user_id == user_id) & (Habit.active != 1)
+        )
+        result = db.exec(stmt).one()
+        return {"user_id": user_id, "active_habits": result}
+    except SQLAlchemyError as e:
+        raise HTTPException(status_code=404, detail=f"Hábitos ativos não encontrados para usuário com id {user_id}: {e}")
