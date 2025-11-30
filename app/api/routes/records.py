@@ -1,3 +1,4 @@
+from datetime import date, datetime, time
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy.exc import SQLAlchemyError
 from app.core.database import get_session
@@ -6,7 +7,7 @@ from app.models.habit import Habit
 from app.models.record import Record
 from app.schemas.record import RecordCreate, RecordRead, RecordUpdate
 from app.crud.base import logger
-from sqlmodel import Session
+from sqlmodel import Session, select
 from fastapi import Depends
 
 router =APIRouter()
@@ -36,6 +37,35 @@ def get_all_records(
     db: Session = Depends(get_session)
 ):
     return crud_record.get_all(offset, limit, db)
+
+# Consulta Complexa: Filtra registros por data
+@router.get("/filter-date", response_model=list[RecordRead])
+def get_record_by_date(
+    user_id: int,
+    habit_id: int,
+    start_date: date,
+    end_date: date,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, le=100),
+    db: Session = Depends(get_session)
+):
+    try:
+        stmt = select(Record).join(Habit).where(Habit.user_id == user_id)
+        stmt = stmt.where(Record.habit_id == habit_id)
+
+        start_datetime = datetime.combine(start_date, time.min)
+        stmt = stmt.where(Record.creation_date >= start_datetime)
+
+        end_datetime = datetime.combine(end_date, time.max)
+        stmt = stmt.where(Record.creation_date <= end_datetime)
+        stmt = stmt.offset(offset).limit(limit)
+
+        return db.exec(stmt).all()
+    except SQLAlchemyError as e:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Não foram encontrados registros durante o intervalo informado: {e}"
+        )
 
 @router.get("/{record_id}", response_model=RecordRead)
 def get_record(record_id: int, db: Session = Depends(get_session)):
