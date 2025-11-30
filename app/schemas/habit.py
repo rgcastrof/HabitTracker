@@ -25,4 +25,4 @@ class HabitUpdate(SQLModel):
 
 class ActiveHabitsResponse(SQLModel):
     user_id: int
-    completed_habits: int
+    active_habits: int
