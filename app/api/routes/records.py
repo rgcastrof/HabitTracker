@@ -32,8 +32,8 @@ def create_record(habit_id: int, record: RecordCreate, db: Session = Depends(get
 
 @router.get("/", response_model=list[RecordRead])
 def get_all_records(
-    offset = Query(default=0),
-    limit = Query(default=10),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, le=100),
     db: Session = Depends(get_session)
 ):
     return crud_record.get_all(offset, limit, db)

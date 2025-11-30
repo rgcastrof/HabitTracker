@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import SQLAlchemyError
 from app.models.habit import Habit
-from app.models.record import Record
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.models.user import User
 from app.schemas.habit import ActiveHabitsResponse, HabitRead
@@ -24,8 +23,8 @@ def create_user(user: UserCreate, db: Session = Depends(get_session)):
 # Read (all)
 @router.get("/", response_model=list[UserRead])
 def get_all_users(
-    offset=Query(default=0),
-    limit=Query(default=10),
+        offset: int = Query(default=0, ge=0),
+        limit: int = Query(default=10, le=100),
     db: Session = Depends(get_session)
 ):
     return crud_user.get_all(offset=offset, limit=limit, db=db)
@@ -58,8 +57,8 @@ def delete_user(user_id: int, db: Session = Depends(get_session)):
 @router.get("/{user_id}/habits", response_model=list[HabitRead])
 def get_habits_by_user(
     user_id: int,
-    offset: int = Query(default=0),
-    limit: int = Query(default=10),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, le=100),
     db: Session = Depends(get_session)
 ):
     try:

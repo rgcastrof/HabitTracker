@@ -33,17 +33,18 @@ def create_habit(user_id: int, habit: HabitCreate, db: Session = Depends(get_ses
 
 @router.get("/", response_model=list[HabitRead])
 def get_all_habits(
-    offset = Query(default=0),
-    limit = Query(default=10),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, le=100),
     db: Session = Depends(get_session)
 ):
     return crud_habit.get_all(offset=offset, limit=limit, db=db)
 
+# Consulta complexa: busca um hábito por texto parcial
 @router.get("/search", response_model=list[HabitRead])
 def get_habit_by_text(
     q: str = "",
-    offset: int = Query(default=0),
-    limit: int = Query(default=10),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, le=100),
     db: Session = Depends(get_session),
     ):
     try:
@@ -79,11 +80,12 @@ def delete_habit(habit_id: int, db: Session = Depends(get_session)):
     if not deleted_habit:
         raise HTTPException(status_code=500, detail="Erro ao deletar hábito")
 
+# Consulta complexa: Retorna registros de hábito por ordem decrescente de data
 @router.get("/{habit_id}/records", response_model=list[RecordRead])
 def get_records_by_habit(
     habit_id: int,
-    offset: int = Query(default=0),
-    limit: int = Query(default=10),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, le=100),
     db: Session = Depends(get_session)
 ):
     try:
