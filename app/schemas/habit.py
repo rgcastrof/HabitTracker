@@ -22,3 +22,7 @@ class HabitUpdate(SQLModel):
     description: str | None
     active: bool | None
     frequence: Frequence | None
+
+class ActiveHabitsResponse(SQLModel):
+    user_id: int
+    completed_habits: int
