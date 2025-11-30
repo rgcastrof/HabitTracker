@@ -14,7 +14,7 @@ class RecordBase(SQLModel):
         id (int | None): Identificador único de registro, chave primária
         value (float): Valor/quantidade do hábito registrado (Ex: 20 páginas lidas)
         status (Status): Status de conclusão registrado (finished, partially, unfinished)
-        commet (str | None): Comentário opcional para registro
+        comment (str | None): Comentário opcional para registro
         creation_date (datetime): Data de criação do registro
     """
     id: int | None = Field(default=None, primary_key=True)
