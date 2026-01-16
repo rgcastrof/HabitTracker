@@ -2,7 +2,7 @@ from beanie import Document
 from pydantic import Field, EmailStr
 from datetime import datetime, timezone
 
-class UserBase(Document):
+class User(Document):
     """
     Documento do MongoDB que representa um usuário.
 
