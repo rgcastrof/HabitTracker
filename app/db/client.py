@@ -3,9 +3,9 @@ from pymongo import AsyncMongoClient
 from beanie import  init_beanie
 import os
 import logging
-from models.user import User
-from models.habit import Habit
-from models.record import Record
+from app.db.models.user import User
+from app.db.models.habit import Habit
+from app.db.models.record import Record
 
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
