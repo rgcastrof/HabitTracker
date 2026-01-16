@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from app.db.client import init_db, close_db
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
