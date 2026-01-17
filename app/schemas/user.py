@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from beanie import PydanticObjectId
 from datetime import datetime
 
 class UserCreate(BaseModel):
@@ -21,12 +22,12 @@ class UserRead(BaseModel):
     Representa os dados retornados pela API ao consultar usuários.
 
     Attributes:
-        id (str): Identificador único do usuário no MongoDB
+        id (PydanticObjectId): Identificador único do usuário no MongoDB
         name (str): Nome do usuário
         email (EmailStr): Email do usuário
         creation_date (datetime): Data de criação do usuário
     """
-    id: str
+    id: PydanticObjectId
     name: str
     email: EmailStr
     creation_date: datetime
