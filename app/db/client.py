@@ -37,6 +37,6 @@ async def close_db():
     global _client
 
     if _client is not None:
-        _client.close()  # type: ignore
+        await _client.close()
         logger.info(f"Closed DATABASE_URL: {DATABASE_URL}")
         _client = None
