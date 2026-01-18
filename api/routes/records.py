@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from beanie import PydanticObjectId
 from fastapi import APIRouter, HTTPException
 from fastapi_pagination import Page
@@ -110,8 +110,15 @@ async def get_records_by_date(
         HTTPException:
             - 400: Intervalo de datas inválido.
     """
-    start_datetime = datetime(year, month, start, tzinfo=timezone.utc)
-    end_datetime = datetime(year, month, end, tzinfo=timezone.utc)
+    if start > end:
+        raise HTTPException(status_code=400, detail="Intervalo de datas inválido.")
+
+    try:
+        start_datetime = datetime(year, month, start, tzinfo=timezone.utc)
+        end_datetime = datetime(year, month, end, tzinfo=timezone.utc) + timedelta(days=1)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Data inválida.")
+
     records = await apaginate(Record.find(
         {"creation_date": {
             "$gte": start_datetime,
