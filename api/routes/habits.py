@@ -35,7 +35,7 @@ async def create_habit(user_id: PydanticObjectId, habit_in: HabitCreate) -> Habi
     await habit_new.insert()
     inserted = await Habit.get(habit_new.id)
     if not inserted:
-        raise HTTPException(status_code=500, detail="Post inserted but could not be loaded")
+        raise HTTPException(status_code=500, detail="Habit inserted but could not be loaded")
 
     return HabitRead.model_validate(inserted.model_dump())
 
