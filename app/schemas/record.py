@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 from app.enums.Status import Status
+from beanie import PydanticObjectId
 
 class RecordCreate(BaseModel):
     """
@@ -24,11 +25,13 @@ class RecordRead(BaseModel):
     Representa os dados retornados pela API ao consultar registro
 
     Attributes:
+        id (PydanticObjectId): Identificador único de registro
         status (Status): Status de conclusão registrado
         value (float): Valor/quantidade do hábito registrado
         comment (str | None): Comentário opcional para registro
         creation_date (datetime): Data de criação do registro
     """
+    id: PydanticObjectId
     status: Status
     value: float
     comment: str | None
