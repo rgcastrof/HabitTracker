@@ -79,6 +79,27 @@ async def delete_user(user_id: PydanticObjectId) -> dict:
     return {"message": f"User with id: {user_id} deleted."}
 
 # Consultas
+# Aggregation pipeline: conta habitos por usuário
+@router.get("/habits-per-user")
+async def count_habits_per_user():
+    """
+    Retorna a quantidade de hábitos cadastrados por usuário.
+
+    Agrupa os hábitos pelo identificador do usuário e contabiliza
+    o total de hábitos associados a cada um.
+
+    Returns:
+        list[dict]: Lista de objetos contendo o identificador do usuário
+        (`_id`) e a quantidade total de hábitos (`count`) associada a ele.
+    """
+    pipeline = [
+        { "$group": { "_id": "$user.$id", "count": { "$sum": 1 }}}
+    ]
+    result = await Habit.aggregate(pipeline).to_list()
+    for doc in result:
+        doc["_id"] = str(doc["_id"])
+    return result
+
 # Busca por texto parcial
 @router.get("/search", response_model=Page[UserRead])
 async def search_users(user_name: str) -> Page[UserRead]:
@@ -143,4 +164,21 @@ async def get_habits_by_user(user_id: PydanticObjectId) -> Page[HabitRead]:
         Page[HabitRead]: Página contendo os hábitos relacionados ao usuário.
     """
     habits = await apaginate(Habit.find({"user.$id": user_id}))
+    return habits
+
+# Hábitos ativos mais recentes de usuario
+@router.get("/{user_id}/habits/recent", response_model=Page[HabitRead])
+async def get_recent_active_habits(user_id: PydanticObjectId) -> Page[HabitRead]:
+    """
+    Lista os hábitos ativos mais recentes de um usuário específico.
+
+    Args:
+        user_id (PydanticObjectId): Identificador único do usuário cujos
+        hábitos ativos mais recentes serão consultados.
+
+    Returns:
+        Page[HabitRead]: Página contendo os hábitos ativos mais recentes
+        relacionados ao usuário.
+    """
+    habits = await apaginate(Habit.find({"user.$id": user_id, "active": True}).sort("started_date"))
     return habits
