@@ -5,11 +5,11 @@ class Status(str, Enum):
     Status de conclusão de um hábito
 
     Attributes:
-        FINISHED: Atividade concluída
+        COMPLETED: Atividade concluída
         PARTIALLY: Atividade parcialmente concluída
         UNFINISHED: Atividade não concluída
     """
 
-    FINISHED = "completed"
+    COMPLETED = "completed"
     PARTIALLY = "partially"
     UNFINISHED = "unfinished"
