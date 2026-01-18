@@ -3,6 +3,8 @@ from beanie import PydanticObjectId
 from fastapi_pagination import Page
 from fastapi_pagination.ext.beanie import apaginate
 from app.db.models.user import User
+from app.db.models.habit import Habit
+from app.schemas.habit import HabitRead
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 
 router = APIRouter()
@@ -23,39 +25,6 @@ async def create_user(user_in: UserCreate) -> UserRead:
     """
     user = User(**user_in.model_dump())
     await user.insert()
-    return UserRead.model_validate(user.model_dump())
-
-# Read
-@router.get("/", response_model=Page[UserRead])
-async def get_users() -> Page[UserRead]:
-    """
-    Retorna uma lista paginada de usuários.
-    Utiliza paginação automática para listar os usuários
-    cadastrados no banco de dados.
-
-    Returns:
-        Page[UserRead]: Página contendo a lista de usuários.
-    """
-    return await apaginate(User.find_all())
-
-@router.get("/{user_id}", response_model=UserRead)
-async def get_user(user_id: PydanticObjectId) -> UserRead:
-    """
-    Recupera um usuário específico pelo seu identificador.
-
-    Args:
-        user_id (PydanticObjectId): Identificador único do usuário.
-
-    Returns:
-        UserRead: Usuário correspondente ao ID informado.
-
-    Raises:
-        HTTPException:
-            - 404: Usuário não encontrado.
-    """
-    user = await User.get(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
     return UserRead.model_validate(user.model_dump())
 
 # Update
@@ -108,3 +77,70 @@ async def delete_user(user_id: PydanticObjectId) -> dict:
 
     await user.delete()
     return {"message": f"User with id: {user_id} deleted."}
+
+# Consultas
+# Busca por texto parcial
+@router.get("/search", response_model=Page[UserRead])
+async def search_users(user_name: str) -> Page[UserRead]:
+    """
+    Busca usuários pelo nome.
+
+    Este endpoint retorna uma lista paginada de usuários cujo campo `name`
+    corresponde ao valor informado, utilizando uma busca por expressão regular.
+
+    Args:
+        user_name (str): Nome ou parte do nome do usuário a ser pesquisado.
+
+    Returns:
+        Page[UserRead]: Página contendo os usuários encontrados.
+    """
+    users = await apaginate(User.find({"name": {"$regex": user_name}}))
+    return users
+
+# Read
+@router.get("/", response_model=Page[UserRead])
+async def get_users() -> Page[UserRead]:
+    """
+    Retorna uma lista paginada de usuários.
+    Utiliza paginação automática para listar os usuários
+    cadastrados no banco de dados.
+
+    Returns:
+        Page[UserRead]: Página contendo a lista de usuários.
+    """
+    return await apaginate(User.find_all())
+
+@router.get("/{user_id}", response_model=UserRead)
+async def get_user(user_id: PydanticObjectId) -> UserRead:
+    """
+    Recupera um usuário específico pelo seu identificador.
+
+    Args:
+        user_id (PydanticObjectId): Identificador único do usuário.
+
+    Returns:
+        UserRead: Usuário correspondente ao ID informado.
+
+    Raises:
+        HTTPException:
+            - 404: Usuário não encontrado.
+    """
+    user = await User.get(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return UserRead.model_validate(user.model_dump())
+
+@router.get("/{user_id}/habits", response_model=Page[HabitRead])
+async def get_habits_by_user(user_id: PydanticObjectId) -> Page[HabitRead]:
+    """
+    Lista hábitos associados a um usuário específico.
+
+    Args:
+        user_id (PydanticObjectId): Identificador único do usuário cujos
+        hábitos serão consultados.
+
+    Returns:
+        Page[HabitRead]: Página contendo os hábitos relacionados ao usuário.
+    """
+    habits = await apaginate(Habit.find({"user.$id": user_id}))
+    return habits
