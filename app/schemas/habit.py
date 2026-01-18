@@ -1,3 +1,4 @@
+from beanie import PydanticObjectId
 from pydantic import BaseModel
 from datetime import datetime
 from app.enums.Frequence import Frequence
@@ -26,14 +27,14 @@ class HabitRead(BaseModel):
     Representa os dados retornados pela API ao consultar hábito
 
     Attributes:
-        id (int): Identificador único de hábito
+        id (PydanticObjectId): Identificador único de hábito
         name (str): Nome do hábito
         description (str | None): Descrição opcional do hábito
         active (bool): Indica se o hábito está ativo
         Frequence: (Frequence | None) Frequencia de execução do hábito
         started_date (datetime): Data de incío de rastreio do hábito
     """
-    id: int
+    id: PydanticObjectId
     name: str
     description: str | None
     active: bool
