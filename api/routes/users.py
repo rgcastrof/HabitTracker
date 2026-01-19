@@ -115,7 +115,7 @@ async def search_users(user_name: str) -> Page[UserRead]:
     Returns:
         Page[UserRead]: Página contendo os usuários encontrados.
     """
-    users = await apaginate(User.find({"name": {"$regex": user_name}}))
+    users = await apaginate(User.find({"name": {"$regex": user_name, "$options": "i"}}))
     return users
 
 # Read

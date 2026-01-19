@@ -108,7 +108,7 @@ async def search_habits(habit_name: str = "") -> Page[HabitRead]:
     Returns:
         Page[HabitRead]: Página contendo os hábitos encontrados.
     """
-    habits = await apaginate(Habit.find({"name": {"$regex": habit_name}}))
+    habits = await apaginate(Habit.find({"name": {"$regex": habit_name, "$options": "i"}}))
     return habits
 
 # Read
