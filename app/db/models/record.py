@@ -23,3 +23,6 @@ class Record(Document):
     
     class Settings:
         name = "records"
+        indexes = [
+            [("habit.$id", 1)]
+        ]

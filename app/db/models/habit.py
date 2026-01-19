@@ -25,3 +25,6 @@ class Habit(Document):
 
     class Settings:
         name = "habits"
+        indexes = [
+            [("user.$id", 1)]
+        ]
