@@ -3,12 +3,11 @@ RestAPI de sistema de rastreamento de hábitos desenvolvido
 com FastAPI, MongoDB e Beanie.
 
 ### Tecnologias utilizadas:
-- **Linguagem:** Python 3.12+
+- **Linguagem de programação:** Python 3.12
 - **Framework Web:** FastAPI
 - **Banco de Dados:** MongoDB
 - **ODM (Object Document Mapper):** Beanie
 - **Gerenciador de Dependências:** uv
-- **Documentação:** OpenAPI (Swagger UI)
 
 ### Diagrama de classes
 ```mermaid
@@ -17,7 +16,7 @@ classDiagram
     class User {
         id: PydanticObjectId
         name: str
-        email: str
+        email: EmailStr
         password: str
         creation_date: datetime
     }
@@ -42,8 +41,8 @@ classDiagram
         habit: Link[Habit]
     }
 
-    User --> "0..*" Habit : Referencia (Link)
-    Habit --> "0..*" Record : Referencia (Link)
+    User --> "0..*" Habit : Link (Referência)
+    Habit --> "0..*" Record : Link (Referência)
 ```
 
 ## Executando o projeto
